@@ -1,0 +1,182 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Eletronico}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/ELETRONICO.CS
+// ============================================================
+
+namespace EletronicosMVC.Models;
+
+public class Eletronico
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Marca { get; set; } = "";
+    public string Categoria { get; set; } = "";
+    public decimal Preco { get; set; }
+    public int Estoque { get; set; }
+}
+
+
+// ============================================================
+// CONTROLLERS/ELETRONICOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using EletronicosMVC.Models;
+
+namespace EletronicosMVC.Controllers;
+
+public class EletronicoController : Controller
+{
+    private List<Eletronico> produtos = new()
+    {
+        new() { Id=1, Nome="Notebook", Marca="Dell", Categoria="Informática", Preco=3500, Estoque=5 },
+        new() { Id=2, Nome="Mouse", Marca="Logitech", Categoria="Acessórios", Preco=100, Estoque=20 },
+        new() { Id=3, Nome="Teclado", Marca="Redragon", Categoria="Acessórios", Preco=250, Estoque=0 },
+        new() { Id=4, Nome="Monitor", Marca="LG", Categoria="Informática", Preco=1200, Estoque=4 },
+        new() { Id=5, Nome="Celular", Marca="Samsung", Categoria="Celular", Preco=2200, Estoque=8 },
+        new() { Id=6, Nome="Tablet", Marca="Samsung", Categoria="Tablet", Preco=1500, Estoque=3 },
+        new() { Id=7, Nome="TV", Marca="LG", Categoria="Televisão", Preco=3000, Estoque=2 },
+        new() { Id=8, Nome="Fone", Marca="JBL", Categoria="Áudio", Preco=350, Estoque=10 },
+        new() { Id=9, Nome="Caixa de Som", Marca="JBL", Categoria="Áudio", Preco=500, Estoque=0 },
+        new() { Id=10, Nome="Webcam", Marca="Logitech", Categoria="Acessórios", Preco=400, Estoque=6 },
+        new() { Id=11, Nome="Console", Marca="Sony", Categoria="Games", Preco=4500, Estoque=2 },
+        new() { Id=12, Nome="Controle", Marca="Sony", Categoria="Games", Preco=400, Estoque=5 }
+    };
+
+    public IActionResult Index() => View(produtos);
+
+    public IActionResult Estoque()
+    {
+        return View(produtos.Where(x => x.Estoque > 0));
+    }
+
+    public IActionResult Categoria(string nome = "Informática")
+    {
+        return View(produtos.Where(x => x.Categoria == nome));
+    }
+
+    public IActionResult Ate(decimal valor = 1000)
+    {
+        return View(produtos.Where(x => x.Preco <= valor));
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Loja de Eletrônicos</title>
+</head>
+<body>
+
+<nav>
+    <a asp-controller="Eletronico" asp-action="Index">Todos</a> |
+    <a asp-controller="Eletronico" asp-action="Estoque">Em Estoque</a> |
+    <a asp-controller="Eletronico" asp-action="Categoria">Informática</a> |
+    <a asp-controller="Eletronico" asp-action="Ate">Até R$ 1.000</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/ELETRONICO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<EletronicosMVC.Models.Eletronico>
+
+<h1>Loja de Eletrônicos</h1>
+
+<table border="1">
+<tr>
+    <th>Nome</th>
+    <th>Marca</th>
+    <th>Categoria</th>
+    <th>Preço</th>
+    <th>Estoque</th>
+    <th>Status</th>
+</tr>
+
+@foreach (var p in Model)
+{
+<tr>
+    <td>@p.Nome</td>
+    <td>@p.Marca</td>
+    <td>@p.Categoria</td>
+    <td>R$ @p.Preco.ToString("N2")</td>
+    <td>@p.Estoque</td>
+    <td>@(p.Estoque > 0 ? "Disponível" : "Produto esgotado")</td>
+</tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/ELETRONICO/ESTOQUE.CSHTML
+// ============================================================
+
+@model IEnumerable<EletronicosMVC.Models.Eletronico>
+
+<h1>Produtos em Estoque</h1>
+
+@foreach (var p in Model)
+{
+    <p>@p.Nome - @p.Estoque unidades</p>
+}
+
+
+// ============================================================
+// VIEWS/ELETRONICO/CATEGORIA.CSHTML
+// ============================================================
+
+@model IEnumerable<EletronicosMVC.Models.Eletronico>
+
+<h1>Produtos da Categoria</h1>
+
+@foreach (var p in Model)
+{
+    <p>@p.Nome - @p.Categoria - R$ @p.Preco.ToString("N2")</p>
+}
+
+
+// ============================================================
+// VIEWS/ELETRONICO/ATE.CSHTML
+// ============================================================
+
+@model IEnumerable<EletronicosMVC.Models.Eletronico>
+
+<h1>Produtos até R$ 1.000</h1>
+
+@foreach (var p in Model)
+{
+    <p>@p.Nome - R$ @p.Preco.ToString("N2")</p>
+}
