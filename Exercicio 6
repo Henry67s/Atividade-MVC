@@ -1,0 +1,143 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Aluno}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/ALUNO.CS
+// ============================================================
+
+namespace AlunosMVC.Models;
+
+public class Aluno
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public int Idade { get; set; }
+    public string Curso { get; set; } = "";
+}
+
+
+// ============================================================
+// CONTROLLERS/ALUNOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using AlunosMVC.Models;
+
+namespace AlunosMVC.Controllers;
+
+public class AlunoController : Controller
+{
+    private List<Aluno> alunos = new()
+    {
+        new Aluno { Id=1, Nome="Ana", Idade=18, Curso="Informática" },
+        new Aluno { Id=2, Nome="Bruno", Idade=19, Curso="Administração" },
+        new Aluno { Id=3, Nome="Carlos", Idade=20, Curso="Desenvolvimento" },
+        new Aluno { Id=4, Nome="Daniela", Idade=18, Curso="Redes" },
+        new Aluno { Id=5, Nome="Eduardo", Idade=21, Curso="Informática" },
+        new Aluno { Id=6, Nome="Fernanda", Idade=19, Curso="Administração" },
+        new Aluno { Id=7, Nome="Gabriel", Idade=20, Curso="Redes" },
+        new Aluno { Id=8, Nome="Helena", Idade=18, Curso="Desenvolvimento" }
+    };
+
+    public IActionResult Index()
+    {
+        return View(alunos);
+    }
+
+    public IActionResult Detalhes(int id)
+    {
+        var aluno = alunos.FirstOrDefault(x => x.Id == id);
+        return View(aluno);
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Cadastro de Alunos</title>
+</head>
+<body>
+
+<h1>Cadastro de Alunos</h1>
+
+<nav>
+    <a asp-controller="Aluno" asp-action="Index">Alunos</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/ALUNO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<AlunosMVC.Models.Aluno>
+
+<h2>Lista de Alunos</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Curso</th>
+        <th>Ação</th>
+    </tr>
+
+@foreach (var aluno in Model)
+{
+    <tr>
+        <td>@aluno.Id</td>
+        <td>@aluno.Nome</td>
+        <td>@aluno.Idade</td>
+        <td>@aluno.Curso</td>
+        <td>
+            <a asp-action="Detalhes" asp-route-id="@aluno.Id">Detalhes</a>
+        </td>
+    </tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/ALUNO/DETALHES.CSHTML
+// ============================================================
+
+@model AlunosMVC.Models.Aluno
+
+<h2>Detalhes do Aluno</h2>
+
+<p><strong>ID:</strong> @Model.Id</p>
+<p><strong>Nome:</strong> @Model.Nome</p>
+<p><strong>Idade:</strong> @Model.Idade</p>
+<p><strong>Curso:</strong> @Model.Curso</p>
+
+<a asp-action="Index">Voltar</a>
