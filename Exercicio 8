@@ -1,0 +1,139 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Biblioteca}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/LIVRO.CS
+// ============================================================
+
+namespace BibliotecaMVC.Models;
+
+public class Livro
+{
+    public int Id { get; set; }
+    public string Titulo { get; set; } = "";
+    public string Autor { get; set; } = "";
+    public int Ano { get; set; }
+    public bool Disponivel { get; set; }
+}
+
+
+// ============================================================
+// CONTROLLERS/BIBLIOTECACONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using BibliotecaMVC.Models;
+
+namespace BibliotecaMVC.Controllers;
+
+public class BibliotecaController : Controller
+{
+    private List<Livro> livros = new()
+    {
+        new() { Id=1, Titulo="Dom Casmurro", Autor="Machado de Assis", Ano=1899, Disponivel=true },
+        new() { Id=2, Titulo="O Cortiço", Autor="Aluísio Azevedo", Ano=1890, Disponivel=false },
+        new() { Id=3, Titulo="1984", Autor="George Orwell", Ano=1949, Disponivel=true },
+        new() { Id=4, Titulo="O Hobbit", Autor="J.R.R. Tolkien", Ano=1937, Disponivel=true },
+        new() { Id=5, Titulo="Harry Potter", Autor="J.K. Rowling", Ano=1997, Disponivel=false },
+        new() { Id=6, Titulo="It", Autor="Stephen King", Ano=1986, Disponivel=true },
+        new() { Id=7, Titulo="O Pequeno Príncipe", Autor="Antoine de Saint-Exupéry", Ano=1943, Disponivel=true },
+        new() { Id=8, Titulo="Hamlet", Autor="William Shakespeare", Ano=1603, Disponivel=false },
+        new() { Id=9, Titulo="A Revolução dos Bichos", Autor="George Orwell", Ano=1945, Disponivel=true },
+        new() { Id=10, Titulo="Sherlock Holmes", Autor="Arthur Conan Doyle", Ano=1887, Disponivel=true }
+    };
+
+    public IActionResult Index() => View(livros);
+
+    public IActionResult Disponiveis()
+    {
+        return View(livros.Where(x => x.Disponivel));
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Biblioteca</title>
+</head>
+<body>
+
+<nav>
+    <a asp-controller="Biblioteca" asp-action="Index">Todos</a> |
+    <a asp-controller="Biblioteca" asp-action="Disponiveis">Disponíveis</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/BIBLIOTECA/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<BibliotecaMVC.Models.Livro>
+
+<h1>Biblioteca</h1>
+
+<table border="1">
+<tr>
+    <th>Título</th>
+    <th>Autor</th>
+    <th>Ano</th>
+    <th>Status</th>
+</tr>
+
+@foreach (var l in Model)
+{
+<tr>
+    <td>@l.Titulo</td>
+    <td>@l.Autor</td>
+    <td>@l.Ano</td>
+    <td>
+        @(l.Disponivel
+            ? "Disponível para empréstimo"
+            : "Emprestado")
+    </td>
+</tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/BIBLIOTECA/DISPONIVEIS.CSHTML
+// ============================================================
+
+@model IEnumerable<BibliotecaMVC.Models.Livro>
+
+<h1>Livros Disponíveis</h1>
+
+@foreach (var livro in Model)
+{
+    <p>@livro.Titulo - @livro.Autor</p>
+}
