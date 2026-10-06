@@ -1,0 +1,135 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Aluno}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/ALUNO.CS
+// ============================================================
+
+namespace NotasMVC.Models;
+
+public class Aluno
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Curso { get; set; } = "";
+    public double Nota1 { get; set; }
+    public double Nota2 { get; set; }
+    public double Nota3 { get; set; }
+
+    public double Media => (Nota1 + Nota2 + Nota3) / 3;
+
+    public string Situacao =>
+        Media >= 6 ? "Aprovado" :
+        Media >= 4 ? "Recuperação" :
+        "Reprovado";
+}
+
+
+// ============================================================
+// CONTROLLERS/ALUNOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using NotasMVC.Models;
+
+namespace NotasMVC.Controllers;
+
+public class AlunoController : Controller
+{
+    private List<Aluno> alunos = new()
+    {
+        new() { Id=1, Nome="Ana", Curso="Informática", Nota1=8, Nota2=7, Nota3=9 },
+        new() { Id=2, Nome="Bruno", Curso="Administração", Nota1=5, Nota2=5, Nota3=4 },
+        new() { Id=3, Nome="Carlos", Curso="Redes", Nota1=3, Nota2=2, Nota3=4 },
+        new() { Id=4, Nome="Daniela", Curso="Informática", Nota1=9, Nota2=8, Nota3=10 },
+        new() { Id=5, Nome="Eduardo", Curso="Redes", Nota1=6, Nota2=6, Nota3=7 },
+        new() { Id=6, Nome="Fernanda", Curso="Administração", Nota1=4, Nota2=5, Nota3=4 },
+        new() { Id=7, Nome="Gabriel", Curso="Informática", Nota1=2, Nota2=3, Nota3=2 },
+        new() { Id=8, Nome="Helena", Curso="Redes", Nota1=7, Nota2=8, Nota3=7 },
+        new() { Id=9, Nome="Igor", Curso="Administração", Nota1=5, Nota2=6, Nota3=5 },
+        new() { Id=10, Nome="Julia", Curso="Informática", Nota1=9, Nota2=9, Nota3=8 }
+    };
+
+    public IActionResult Index() => View(alunos);
+
+    public IActionResult Aprovados()
+        => View("Index", alunos.Where(x => x.Media >= 6));
+
+    public IActionResult Recuperacao()
+        => View("Index", alunos.Where(x => x.Media >= 4 && x.Media < 6));
+
+    public IActionResult Reprovados()
+        => View("Index", alunos.Where(x => x.Media < 4));
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Sistema de Notas</title>
+</head>
+<body>
+
+<nav>
+    <a asp-action="Index">Todos</a> |
+    <a asp-action="Aprovados">Aprovados</a> |
+    <a asp-action="Recuperacao">Recuperação</a> |
+    <a asp-action="Reprovados">Reprovados</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/ALUNO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<NotasMVC.Models.Aluno>
+
+<h1>Sistema de Notas</h1>
+
+<table border="1">
+<tr>
+    <th>Aluno</th>
+    <th>Curso</th>
+    <th>Média</th>
+    <th>Situação</th>
+</tr>
+
+@foreach (var a in Model)
+{
+<tr>
+    <td>@a.Nome</td>
+    <td>@a.Curso</td>
+    <td>@a.Media.ToString("N2")</td>
+    <td>@a.Situacao</td>
+</tr>
+}
+</table>
