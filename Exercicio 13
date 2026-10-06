@@ -1,0 +1,166 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Pedido}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/PEDIDO.CS
+// ============================================================
+
+namespace PedidosMVC.Models;
+
+public class Pedido
+{
+    public int Id { get; set; }
+    public string Cliente { get; set; } = "";
+    public string Produto { get; set; } = "";
+    public int Quantidade { get; set; }
+    public decimal PrecoUnitario { get; set; }
+    public string Status { get; set; } = "";
+
+    public decimal Total => Quantidade * PrecoUnitario;
+}
+
+
+// ============================================================
+// CONTROLLERS/PEDIDOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using PedidosMVC.Models;
+
+namespace PedidosMVC.Controllers;
+
+public class PedidoController : Controller
+{
+    private List<Pedido> pedidos = new()
+    {
+        new() { Id=1, Cliente="Ana", Produto="Notebook", Quantidade=1, PrecoUnitario=3500, Status="Recebido" },
+        new() { Id=2, Cliente="Bruno", Produto="Mouse", Quantidade=2, PrecoUnitario=80, Status="Em preparo" },
+        new() { Id=3, Cliente="Carlos", Produto="Teclado", Quantidade=1, PrecoUnitario=120, Status="Pronto" },
+        new() { Id=4, Cliente="Daniela", Produto="Monitor", Quantidade=2, PrecoUnitario=900, Status="Entregue" },
+        new() { Id=5, Cliente="Eduardo", Produto="Celular", Quantidade=1, PrecoUnitario=2200, Status="Em preparo" },
+        new() { Id=6, Cliente="Fernanda", Produto="Tablet", Quantidade=1, PrecoUnitario=1500, Status="Pronto" },
+        new() { Id=7, Cliente="Gabriel", Produto="Fone", Quantidade=3, PrecoUnitario=200, Status="Entregue" },
+        new() { Id=8, Cliente="Helena", Produto="Webcam", Quantidade=1, PrecoUnitario=300, Status="Recebido" },
+        new() { Id=9, Cliente="Igor", Produto="Impressora", Quantidade=1, PrecoUnitario=800, Status="Em preparo" },
+        new() { Id=10, Cliente="Julia", Produto="HD Externo", Quantidade=2, PrecoUnitario=450, Status="Entregue" }
+    };
+
+    public IActionResult Index() => View(pedidos);
+
+    public IActionResult Preparo()
+        => View("Index", pedidos.Where(x => x.Status == "Em preparo"));
+
+    public IActionResult Prontos()
+        => View("Index", pedidos.Where(x => x.Status == "Pronto"));
+
+    public IActionResult Entregues()
+        => View("Index", pedidos.Where(x => x.Status == "Entregue"));
+
+    public IActionResult Resumo()
+    {
+        ViewBag.TotalPedidos = pedidos.Count;
+        ViewBag.ValorTotal = pedidos.Sum(x => x.Total);
+        ViewBag.Recebidos = pedidos.Count(x => x.Status == "Recebido");
+        ViewBag.Preparo = pedidos.Count(x => x.Status == "Em preparo");
+        ViewBag.Prontos = pedidos.Count(x => x.Status == "Pronto");
+        ViewBag.Entregues = pedidos.Count(x => x.Status == "Entregue");
+
+        return View();
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Sistema de Pedidos</title>
+</head>
+<body>
+
+<nav>
+    <a asp-action="Index">Pedidos</a> |
+    <a asp-action="Preparo">Em preparo</a> |
+    <a asp-action="Prontos">Prontos</a> |
+    <a asp-action="Entregues">Entregues</a> |
+    <a asp-action="Resumo">Dashboard</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/PEDIDO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<PedidosMVC.Models.Pedido>
+
+<h1>Pedidos</h1>
+
+<table border="1">
+<tr>
+    <th>ID</th>
+    <th>Cliente</th>
+    <th>Produto</th>
+    <th>Quantidade</th>
+    <th>Preço</th>
+    <th>Total</th>
+    <th>Status</th>
+</tr>
+
+@foreach (var p in Model)
+{
+<tr>
+    <td>@p.Id</td>
+    <td>@p.Cliente</td>
+    <td>@p.Produto</td>
+    <td>@p.Quantidade</td>
+    <td>R$ @p.PrecoUnitario.ToString("N2")</td>
+    <td>R$ @p.Total.ToString("N2")</td>
+    <td>@p.Status</td>
+</tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/PEDIDO/RESUMO.CSHTML
+// ============================================================
+
+<h1>Dashboard de Pedidos</h1>
+
+<p>Total de pedidos: <strong>@ViewBag.TotalPedidos</strong></p>
+<p>Valor total: <strong>R$ @ViewBag.ValorTotal.ToString("N2")</strong></p>
+
+<h2>Por Status</h2>
+
+<p>Recebidos: @ViewBag.Recebidos</p>
+<p>Em preparo: @ViewBag.Preparo</p>
+<p>Prontos: @ViewBag.Prontos</p>
+<p>Entregues: @ViewBag.Entregues</p>
