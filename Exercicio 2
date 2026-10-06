@@ -1,0 +1,132 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Academia}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// CONTROLLERS/ACADEMIACONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+
+namespace AcademiaMVC.Controllers;
+
+public class AcademiaController : Controller
+{
+    public IActionResult Index() => View();
+
+    public IActionResult Musculacao() => View();
+
+    public IActionResult Cardio() => View();
+
+    public IActionResult Planos() => View();
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Academia Fitness</title>
+</head>
+<body>
+
+<nav>
+    <a asp-controller="Academia" asp-action="Index">Início</a> |
+    <a asp-controller="Academia" asp-action="Musculacao">Musculação</a> |
+    <a asp-controller="Academia" asp-action="Cardio">Cardio</a> |
+    <a asp-controller="Academia" asp-action="Planos">Planos</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/ACADEMIA/INDEX.CSHTML
+// ============================================================
+
+<h1>Academia Fitness</h1>
+
+<h2>Treine, evolua e alcance seus objetivos.</h2>
+
+<p>Estrutura completa para musculação, cardio e treinamento funcional.</p>
+
+
+// ============================================================
+// VIEWS/ACADEMIA/MUSCULACAO.CSHTML
+// ============================================================
+
+<h1>Musculação</h1>
+
+<ul>
+    <li>Supino</li>
+    <li>Agachamento</li>
+    <li>Leg Press</li>
+    <li>Rosca Direta</li>
+    <li>Puxada Frontal</li>
+</ul>
+
+
+// ============================================================
+// VIEWS/ACADEMIA/CARDIO.CSHTML
+// ============================================================
+
+<h1>Cardio</h1>
+
+<ul>
+    <li>Esteira</li>
+    <li>Bicicleta</li>
+    <li>Elíptico</li>
+    <li>Spinning</li>
+</ul>
+
+
+// ============================================================
+// VIEWS/ACADEMIA/PLANOS.CSHTML
+// ============================================================
+
+<h1>Planos</h1>
+
+<table border="1">
+    <tr>
+        <th>Plano</th>
+        <th>Preço</th>
+    </tr>
+    <tr>
+        <td>Básico</td>
+        <td>R$ 79,90</td>
+    </tr>
+    <tr>
+        <td>Premium</td>
+        <td>R$ 119,90</td>
+    </tr>
+    <tr>
+        <td>VIP</td>
+        <td>R$ 159,90</td>
+    </tr>
+</table>
