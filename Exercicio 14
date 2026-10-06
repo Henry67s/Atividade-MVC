@@ -1,0 +1,143 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Curso}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/CURSO.CS
+// ============================================================
+
+namespace CursosMVC.Models;
+
+public class Curso
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public int CargaHoraria { get; set; }
+    public string Modalidade { get; set; } = "";
+    public int Vagas { get; set; }
+    public decimal Valor { get; set; }
+
+    public string Status =>
+        Vagas > 0 ? "Inscrições abertas" : "Turma lotada";
+}
+
+
+// ============================================================
+// CONTROLLERS/CURSOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using CursosMVC.Models;
+
+namespace CursosMVC.Controllers;
+
+public class CursoController : Controller
+{
+    private List<Curso> cursos = new()
+    {
+        new() { Id=1, Nome="C#", CargaHoraria=80, Modalidade="Online", Vagas=20, Valor=500 },
+        new() { Id=2, Nome="ASP.NET Core", CargaHoraria=100, Modalidade="Presencial", Vagas=15, Valor=700 },
+        new() { Id=3, Nome="Banco de Dados", CargaHoraria=60, Modalidade="Online", Vagas=0, Valor=400 },
+        new() { Id=4, Nome="HTML e CSS", CargaHoraria=40, Modalidade="Presencial", Vagas=10, Valor=300 },
+        new() { Id=5, Nome="JavaScript", CargaHoraria=60, Modalidade="Online", Vagas=12, Valor=450 },
+        new() { Id=6, Nome="Python", CargaHoraria=80, Modalidade="Presencial", Vagas=8, Valor=600 },
+        new() { Id=7, Nome="Excel", CargaHoraria=40, Modalidade="Online", Vagas=25, Valor=250 },
+        new() { Id=8, Nome="Power BI", CargaHoraria=50, Modalidade="Presencial", Vagas=0, Valor=550 },
+        new() { Id=9, Nome="Git e GitHub", CargaHoraria=30, Modalidade="Online", Vagas=18, Valor=200 },
+        new() { Id=10, Nome="Redes", CargaHoraria=70, Modalidade="Presencial", Vagas=5, Valor=500 }
+    };
+
+    public IActionResult Index() => View(cursos);
+
+    public IActionResult Disponiveis()
+        => View("Index", cursos.Where(x => x.Vagas > 0));
+
+    public IActionResult Online()
+        => View("Index", cursos.Where(x => x.Modalidade == "Online"));
+
+    public IActionResult Presenciais()
+        => View("Index", cursos.Where(x => x.Modalidade == "Presencial"));
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Sistema de Cursos</title>
+</head>
+<body>
+
+<nav>
+    <a asp-action="Index">Todos</a> |
+    <a asp-action="Disponiveis">Disponíveis</a> |
+    <a asp-action="Online">Online</a> |
+    <a asp-action="Presenciais">Presenciais</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/CURSO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<CursosMVC.Models.Curso>
+
+<h1>Sistema de Cursos</h1>
+
+<table border="1">
+<tr>
+    <th>Curso</th>
+    <th>Carga Horária</th>
+    <th>Modalidade</th>
+    <th>Vagas</th>
+    <th>Valor</th>
+    <th>Status</th>
+</tr>
+
+@foreach (var c in Model)
+{
+<tr>
+    <td>@c.Nome</td>
+    <td>@c.CargaHoraria horas</td>
+    <td>@c.Modalidade</td>
+    <td>@c.Vagas</td>
+    <td>R$ @c.Valor.ToString("N2")</td>
+    <td>@c.Status</td>
+</tr>
+}
+</table>
+
+<h2>Resumo</h2>
+
+<p>Total de cursos: @Model.Count()</p>
+<p>Disponíveis: @Model.Count(x => x.Vagas > 0)</p>
+<p>Lotados: @Model.Count(x => x.Vagas == 0)</p>
+<p>Online: @Model.Count(x => x.Modalidade == "Online")</p>
+<p>Presenciais: @Model.Count(x => x.Modalidade == "Presencial")</p>
