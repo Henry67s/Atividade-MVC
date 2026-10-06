@@ -1,0 +1,140 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Hotel}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// CONTROLLERS/HOTELCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+
+namespace HotelMVC.Controllers;
+
+public class HotelController : Controller
+{
+    public IActionResult Index() => View();
+
+    public IActionResult Quartos() => View();
+
+    public IActionResult Servicos() => View();
+
+    public IActionResult Contato() => View();
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Hotel Paraíso</title>
+</head>
+<body>
+
+<header>
+    <h1>Hotel Paraíso</h1>
+</header>
+
+<nav>
+    <a asp-controller="Hotel" asp-action="Index">Início</a> |
+    <a asp-controller="Hotel" asp-action="Quartos">Quartos</a> |
+    <a asp-controller="Hotel" asp-action="Servicos">Serviços</a> |
+    <a asp-controller="Hotel" asp-action="Contato">Contato</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/HOTEL/INDEX.CSHTML
+// ============================================================
+
+<h1>Bem-vindo ao Hotel Paraíso</h1>
+
+<p>Conforto e qualidade para sua estadia.</p>
+
+
+// ============================================================
+// VIEWS/HOTEL/QUARTOS.CSHTML
+// ============================================================
+
+<h1>Quartos</h1>
+
+<table border="1">
+    <tr>
+        <th>Quarto</th>
+        <th>Capacidade</th>
+        <th>Descrição</th>
+        <th>Diária</th>
+    </tr>
+
+    <tr>
+        <td>Standard</td>
+        <td>2 pessoas</td>
+        <td>Quarto confortável</td>
+        <td>R$ 180,00</td>
+    </tr>
+
+    <tr>
+        <td>Luxo</td>
+        <td>3 pessoas</td>
+        <td>Quarto amplo com varanda</td>
+        <td>R$ 280,00</td>
+    </tr>
+
+    <tr>
+        <td>Suíte</td>
+        <td>4 pessoas</td>
+        <td>Suíte completa</td>
+        <td>R$ 400,00</td>
+    </tr>
+</table>
+
+
+// ============================================================
+// VIEWS/HOTEL/SERVICOS.CSHTML
+// ============================================================
+
+<h1>Serviços</h1>
+
+<ul>
+    <li>Café da manhã</li>
+    <li>Wi-Fi gratuito</li>
+    <li>Piscina</li>
+    <li>Estacionamento</li>
+    <li>Serviço de quarto</li>
+</ul>
+
+
+// ============================================================
+// VIEWS/HOTEL/CONTATO.CSHTML
+// ============================================================
+
+<h1>Contato</h1>
+
+<p>Telefone: (11) 97777-7777</p>
+<p>Email: contato@hotelparaiso.com</p>
