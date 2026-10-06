@@ -1,0 +1,193 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Funcionario}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/FUNCIONARIO.CS
+// ============================================================
+
+namespace DesafioFinalMVC.Models;
+
+public class Funcionario
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Cargo { get; set; } = "";
+    public string Departamento { get; set; } = "";
+    public decimal Salario { get; set; }
+    public bool Ativo { get; set; }
+
+    public string Status =>
+        Ativo ? "Funcionário ativo" : "Funcionário desligado";
+
+    public string Faixa =>
+        Salario < 2500 ? "Faixa 1" :
+        Salario <= 5000 ? "Faixa 2" :
+        "Faixa 3";
+}
+
+
+// ============================================================
+// CONTROLLERS/FUNCIONARIOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using DesafioFinalMVC.Models;
+
+namespace DesafioFinalMVC.Controllers;
+
+public class FuncionarioController : Controller
+{
+    private List<Funcionario> funcionarios = new()
+    {
+        new() { Id=1, Nome="Ana", Cargo="Analista", Departamento="TI", Salario=4500, Ativo=true },
+        new() { Id=2, Nome="Bruno", Cargo="Gerente", Departamento="RH", Salario=6500, Ativo=true },
+        new() { Id=3, Nome="Carlos", Cargo="Assistente", Departamento="Financeiro", Salario=2200, Ativo=false },
+        new() { Id=4, Nome="Daniela", Cargo="Programadora", Departamento="TI", Salario=5200, Ativo=true },
+        new() { Id=5, Nome="Eduardo", Cargo="Vendedor", Departamento="Comercial", Salario=2800, Ativo=true },
+        new() { Id=6, Nome="Fernanda", Cargo="Analista", Departamento="RH", Salario=3900, Ativo=false },
+        new() { Id=7, Nome="Gabriel", Cargo="Diretor", Departamento="Diretoria", Salario=9000, Ativo=true },
+        new() { Id=8, Nome="Helena", Cargo="Assistente", Departamento="Financeiro", Salario=2300, Ativo=true },
+        new() { Id=9, Nome="Igor", Cargo="Programador", Departamento="TI", Salario=4800, Ativo=true },
+        new() { Id=10, Nome="Julia", Cargo="Vendedora", Departamento="Comercial", Salario=2600, Ativo=false },
+        new() { Id=11, Nome="Lucas", Cargo="Gerente", Departamento="Comercial", Salario=5800, Ativo=true },
+        new() { Id=12, Nome="Mariana", Cargo="Analista", Departamento="RH", Salario=4200, Ativo=true },
+        new() { Id=13, Nome="Nicolas", Cargo="Assistente", Departamento="Financeiro", Salario=2100, Ativo=false },
+        new() { Id=14, Nome="Paula", Cargo="Coordenadora", Departamento="TI", Salario=6200, Ativo=true },
+        new() { Id=15, Nome="Rafael", Cargo="Analista", Departamento="Financeiro", Salario=3700, Ativo=true }
+    };
+
+    public IActionResult Index() => View(funcionarios);
+
+    public IActionResult Ativos()
+        => View("Index", funcionarios.Where(x => x.Ativo));
+
+    public IActionResult Inativos()
+        => View("Index", funcionarios.Where(x => !x.Ativo));
+
+    public IActionResult Departamento(string nome = "TI")
+        => View("Index", funcionarios.Where(x => x.Departamento == nome));
+
+    public IActionResult Dashboard()
+    {
+        ViewBag.Total = funcionarios.Count;
+        ViewBag.Ativos = funcionarios.Count(x => x.Ativo);
+        ViewBag.Inativos = funcionarios.Count(x => !x.Ativo);
+        ViewBag.Media = funcionarios.Average(x => x.Salario);
+        ViewBag.Maximo = funcionarios.Max(x => x.Salario);
+        ViewBag.Minimo = funcionarios.Min(x => x.Salario);
+
+        ViewBag.TI = funcionarios.Count(x => x.Departamento == "TI");
+        ViewBag.RH = funcionarios.Count(x => x.Departamento == "RH");
+        ViewBag.Financeiro = funcionarios.Count(x => x.Departamento == "Financeiro");
+        ViewBag.Comercial = funcionarios.Count(x => x.Departamento == "Comercial");
+        ViewBag.Diretoria = funcionarios.Count(x => x.Departamento == "Diretoria");
+
+        return View();
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Desafio Final</title>
+</head>
+<body>
+
+<h1>Sistema de Funcionários</h1>
+
+<nav>
+    <a asp-action="Index">Todos</a> |
+    <a asp-action="Ativos">Ativos</a> |
+    <a asp-action="Inativos">Inativos</a> |
+    <a asp-action="Departamento">TI</a> |
+    <a asp-action="Dashboard">Dashboard</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/FUNCIONARIO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<DesafioFinalMVC.Models.Funcionario>
+
+<h2>Funcionários</h2>
+
+<table border="1">
+<tr>
+    <th>Nome</th>
+    <th>Cargo</th>
+    <th>Departamento</th>
+    <th>Salário</th>
+    <th>Status</th>
+    <th>Faixa</th>
+</tr>
+
+@foreach (var f in Model)
+{
+<tr>
+    <td>@f.Nome</td>
+    <td>@f.Cargo</td>
+    <td>@f.Departamento</td>
+    <td>R$ @f.Salario.ToString("N2")</td>
+    <td>@f.Status</td>
+    <td>@f.Faixa</td>
+</tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/FUNCIONARIO/DASHBOARD.CSHTML
+// ============================================================
+
+<h1>Dashboard</h1>
+
+<h2>Resumo Geral</h2>
+
+<p>Total de funcionários: <strong>@ViewBag.Total</strong></p>
+<p>Funcionários ativos: <strong>@ViewBag.Ativos</strong></p>
+<p>Funcionários inativos: <strong>@ViewBag.Inativos</strong></p>
+
+<h2>Departamentos</h2>
+
+<p>TI: @ViewBag.TI</p>
+<p>RH: @ViewBag.RH</p>
+<p>Financeiro: @ViewBag.Financeiro</p>
+<p>Comercial: @ViewBag.Comercial</p>
+<p>Diretoria: @ViewBag.Diretoria</p>
+
+<h2>Salários</h2>
+
+<p>Média salarial: R$ @ViewBag.Media.ToString("N2")</p>
+<p>Maior salário: R$ @ViewBag.Maximo.ToString("N2")</p>
+<p>Menor salário: R$ @ViewBag.Minimo.ToString("N2")</p>
