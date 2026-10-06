@@ -1,0 +1,153 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Veterinaria}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/ANIMAL.CS
+// ============================================================
+
+namespace VeterinariaMVC.Models;
+
+public class Animal
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Especie { get; set; } = "";
+    public int Idade { get; set; }
+    public string Dono { get; set; } = "";
+}
+
+
+// ============================================================
+// CONTROLLERS/VETERINARIACONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using VeterinariaMVC.Models;
+
+namespace VeterinariaMVC.Controllers;
+
+public class VeterinariaController : Controller
+{
+    private List<Animal> animais = new()
+    {
+        new() { Id=1, Nome="Rex", Especie="Cachorro", Idade=5, Dono="João" },
+        new() { Id=2, Nome="Mel", Especie="Cachorro", Idade=3, Dono="Ana" },
+        new() { Id=3, Nome="Thor", Especie="Cachorro", Idade=7, Dono="Carlos" },
+        new() { Id=4, Nome="Luna", Especie="Gato", Idade=2, Dono="Mariana" },
+        new() { Id=5, Nome="Mimi", Especie="Gato", Idade=4, Dono="Pedro" },
+        new() { Id=6, Nome="Nina", Especie="Gato", Idade=1, Dono="Julia" },
+        new() { Id=7, Nome="Bob", Especie="Cachorro", Idade=6, Dono="Lucas" },
+        new() { Id=8, Nome="Simba", Especie="Gato", Idade=5, Dono="Paula" }
+    };
+
+    public IActionResult Index() => View(animais);
+
+    public IActionResult Cachorros()
+    {
+        return View(animais.Where(x => x.Especie == "Cachorro"));
+    }
+
+    public IActionResult Gatos()
+    {
+        return View(animais.Where(x => x.Especie == "Gato"));
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Clínica Veterinária</title>
+</head>
+<body>
+
+<nav>
+    <a asp-controller="Veterinaria" asp-action="Index">Todos</a> |
+    <a asp-controller="Veterinaria" asp-action="Cachorros">Cachorros</a> |
+    <a asp-controller="Veterinaria" asp-action="Gatos">Gatos</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/VETERINARIA/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<VeterinariaMVC.Models.Animal>
+
+<h1>Clínica Veterinária</h1>
+
+<table border="1">
+<tr>
+    <th>Nome</th>
+    <th>Espécie</th>
+    <th>Idade</th>
+    <th>Dono</th>
+</tr>
+
+@foreach (var a in Model)
+{
+<tr>
+    <td>@a.Nome</td>
+    <td>@a.Especie</td>
+    <td>@a.Idade</td>
+    <td>@a.Dono</td>
+</tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/VETERINARIA/CACHORROS.CSHTML
+// ============================================================
+
+@model IEnumerable<VeterinariaMVC.Models.Animal>
+
+<h1>Cachorros</h1>
+
+@foreach (var a in Model)
+{
+    <p>@a.Nome - @a.Idade anos - Dono: @a.Dono</p>
+}
+
+
+// ============================================================
+// VIEWS/VETERINARIA/GATOS.CSHTML
+// ============================================================
+
+@model IEnumerable<VeterinariaMVC.Models.Animal>
+
+<h1>Gatos</h1>
+
+@foreach (var a in Model)
+{
+    <p>@a.Nome - @a.Idade anos - Dono: @a.Dono</p>
+}
