@@ -1,0 +1,135 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Cinema}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// CONTROLLERS/CINEMACONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+
+namespace CinemaMVC.Controllers;
+
+public class CinemaController : Controller
+{
+    public IActionResult Index() => View();
+
+    public IActionResult Filmes() => View();
+
+    public IActionResult Ingressos() => View();
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Cinema MVC</title>
+</head>
+<body>
+
+<nav>
+    <a asp-controller="Cinema" asp-action="Index">Início</a> |
+    <a asp-controller="Cinema" asp-action="Filmes">Filmes</a> |
+    <a asp-controller="Cinema" asp-action="Ingressos">Ingressos</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/CINEMA/INDEX.CSHTML
+// ============================================================
+
+<h1>Cinema Central</h1>
+
+<p>Confira os filmes em cartaz e compre seus ingressos.</p>
+
+
+// ============================================================
+// VIEWS/CINEMA/FILMES.CSHTML
+// ============================================================
+
+<h1>Filmes em Cartaz</h1>
+
+<table border="1">
+    <tr>
+        <th>Filme</th>
+        <th>Gênero</th>
+        <th>Classificação</th>
+        <th>Horário</th>
+    </tr>
+
+    <tr>
+        <td>Aventura Espacial</td>
+        <td>Ficção</td>
+        <td>12 anos</td>
+        <td>18:00</td>
+    </tr>
+
+    <tr>
+        <td>O Mistério</td>
+        <td>Suspense</td>
+        <td>14 anos</td>
+        <td>20:00</td>
+    </tr>
+
+    <tr>
+        <td>Heróis Unidos</td>
+        <td>Ação</td>
+        <td>12 anos</td>
+        <td>21:00</td>
+    </tr>
+
+    <tr>
+        <td>O Reino Perdido</td>
+        <td>Aventura</td>
+        <td>Livre</td>
+        <td>16:00</td>
+    </tr>
+
+    <tr>
+        <td>Comédia da Vida</td>
+        <td>Comédia</td>
+        <td>10 anos</td>
+        <td>19:00</td>
+    </tr>
+</table>
+
+
+// ============================================================
+// VIEWS/CINEMA/INGRESSOS.CSHTML
+// ============================================================
+
+<h1>Ingressos</h1>
+
+<ul>
+    <li>Inteira - R$ 35,00</li>
+    <li>Meia-entrada - R$ 17,50</li>
+    <li>Sessão especial - R$ 45,00</li>
+</ul>
