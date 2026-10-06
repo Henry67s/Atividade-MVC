@@ -1,0 +1,139 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Produto}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/PRODUTO.CS
+// ============================================================
+
+namespace ProdutosMVC.Models;
+
+public class Produto
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Categoria { get; set; } = "";
+    public int Estoque { get; set; }
+    public decimal Preco { get; set; }
+}
+
+
+// ============================================================
+// CONTROLLERS/PRODUTOCONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using ProdutosMVC.Models;
+
+namespace ProdutosMVC.Controllers;
+
+public class ProdutoController : Controller
+{
+    private List<Produto> produtos = new()
+    {
+        new() { Id=1, Nome="Notebook", Categoria="Informática", Estoque=5, Preco=3500 },
+        new() { Id=2, Nome="Mouse", Categoria="Informática", Estoque=20, Preco=80 },
+        new() { Id=3, Nome="Teclado", Categoria="Informática", Estoque=0, Preco=120 },
+        new() { Id=4, Nome="Monitor", Categoria="Informática", Estoque=8, Preco=900 },
+        new() { Id=5, Nome="Cadeira", Categoria="Móveis", Estoque=4, Preco=700 },
+        new() { Id=6, Nome="Mesa", Categoria="Móveis", Estoque=0, Preco=500 },
+        new() { Id=7, Nome="Celular", Categoria="Eletrônicos", Estoque=10, Preco=2200 },
+        new() { Id=8, Nome="Tablet", Categoria="Eletrônicos", Estoque=3, Preco=1500 },
+        new() { Id=9, Nome="Fone", Categoria="Eletrônicos", Estoque=15, Preco=200 },
+        new() { Id=10, Nome="Webcam", Categoria="Informática", Estoque=6, Preco=300 }
+    };
+
+    public IActionResult Index() => View(produtos);
+
+    public IActionResult Disponiveis()
+    {
+        return View(produtos.Where(x => x.Estoque > 0));
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Produtos</title>
+</head>
+<body>
+
+<nav>
+    <a asp-controller="Produto" asp-action="Index">Todos</a> |
+    <a asp-controller="Produto" asp-action="Disponiveis">Disponíveis</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/PRODUTO/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<ProdutosMVC.Models.Produto>
+
+<h1>Catálogo de Produtos</h1>
+
+<table border="1">
+<tr>
+    <th>Nome</th>
+    <th>Categoria</th>
+    <th>Estoque</th>
+    <th>Preço</th>
+    <th>Status</th>
+</tr>
+
+@foreach (var p in Model)
+{
+<tr>
+    <td>@p.Nome</td>
+    <td>@p.Categoria</td>
+    <td>@p.Estoque</td>
+    <td>R$ @p.Preco.ToString("N2")</td>
+    <td>@(p.Estoque == 0 ? "Produto esgotado" : "Disponível")</td>
+</tr>
+}
+</table>
+
+
+// ============================================================
+// VIEWS/PRODUTO/DISPONIVEIS.CSHTML
+// ============================================================
+
+@model IEnumerable<ProdutosMVC.Models.Produto>
+
+<h1>Produtos Disponíveis</h1>
+
+<ul>
+@foreach (var p in Model)
+{
+    <li>@p.Nome - @p.Estoque unidades</li>
+}
+</ul>
