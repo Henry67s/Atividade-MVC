@@ -1,0 +1,110 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Escola}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// CONTROLLERS/ESCOLACONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+
+namespace EscolaMVC.Controllers;
+
+public class EscolaController : Controller
+{
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    public IActionResult Cursos()
+    {
+        return View();
+    }
+
+    public IActionResult Contato()
+    {
+        return View();
+    }
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Escola MVC</title>
+</head>
+<body>
+
+    <nav>
+        <a asp-controller="Escola" asp-action="Index">Início</a> |
+        <a asp-controller="Escola" asp-action="Cursos">Cursos</a> |
+        <a asp-controller="Escola" asp-action="Contato">Contato</a>
+    </nav>
+
+    <hr />
+
+    @RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/ESCOLA/INDEX.CSHTML
+// ============================================================
+
+<h1>Escola de Tecnologia</h1>
+
+<p>Bem-vindo à nossa escola!</p>
+<p>Oferecemos cursos profissionalizantes para preparar nossos alunos para o mercado de trabalho.</p>
+
+<p><strong>Endereço:</strong> Rua Principal, 100 - São Paulo/SP</p>
+<p><strong>Telefone:</strong> (11) 99999-9999</p>
+
+
+// ============================================================
+// VIEWS/ESCOLA/CURSOS.CSHTML
+// ============================================================
+
+<h1>Cursos</h1>
+
+<ul>
+    <li>Desenvolvimento de Sistemas</li>
+    <li>Administração</li>
+    <li>Informática</li>
+    <li>Redes de Computadores</li>
+</ul>
+
+
+// ============================================================
+// VIEWS/ESCOLA/CONTATO.CSHTML
+// ============================================================
+
+<h1>Contato</h1>
+
+<p><strong>Email:</strong> contato@escola.com</p>
+<p><strong>Telefone:</strong> (11) 99999-9999</p>
+<p><strong>Endereço:</strong> Rua Principal, 100</p>
