@@ -1,0 +1,142 @@
+// ============================================================
+// PROGRAM.CS
+// ============================================================
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Estoque}/{action=Index}/{id?}");
+
+app.Run();
+
+
+// ============================================================
+// MODELS/PRODUTO.CS
+// ============================================================
+
+namespace EstoqueMVC.Models;
+
+public class Produto
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Categoria { get; set; } = "";
+    public int Estoque { get; set; }
+    public int EstoqueMinimo { get; set; }
+    public decimal Preco { get; set; }
+
+    public string Status =>
+        Estoque == 0 ? "ESGOTADO" :
+        Estoque <= EstoqueMinimo ? "ESTOQUE BAIXO" :
+        "ESTOQUE NORMAL";
+}
+
+
+// ============================================================
+// CONTROLLERS/ESTOQUECONTROLLER.CS
+// ============================================================
+
+using Microsoft.AspNetCore.Mvc;
+using EstoqueMVC.Models;
+
+namespace EstoqueMVC.Controllers;
+
+public class EstoqueController : Controller
+{
+    private List<Produto> produtos = new()
+    {
+        new() { Id=1, Nome="Notebook", Categoria="Informática", Estoque=5, EstoqueMinimo=3, Preco=3500 },
+        new() { Id=2, Nome="Mouse", Categoria="Informática", Estoque=2, EstoqueMinimo=5, Preco=80 },
+        new() { Id=3, Nome="Teclado", Categoria="Informática", Estoque=0, EstoqueMinimo=3, Preco=120 },
+        new() { Id=4, Nome="Monitor", Categoria="Informática", Estoque=8, EstoqueMinimo=4, Preco=900 },
+        new() { Id=5, Nome="Cadeira", Categoria="Móveis", Estoque=1, EstoqueMinimo=3, Preco=700 },
+        new() { Id=6, Nome="Mesa", Categoria="Móveis", Estoque=10, EstoqueMinimo=3, Preco=500 },
+        new() { Id=7, Nome="Celular", Categoria="Eletrônicos", Estoque=0, EstoqueMinimo=2, Preco=2200 },
+        new() { Id=8, Nome="Tablet", Categoria="Eletrônicos", Estoque=4, EstoqueMinimo=3, Preco=1500 },
+        new() { Id=9, Nome="Fone", Categoria="Áudio", Estoque=2, EstoqueMinimo=5, Preco=200 },
+        new() { Id=10, Nome="Webcam", Categoria="Informática", Estoque=6, EstoqueMinimo=2, Preco=300 },
+        new() { Id=11, Nome="Impressora", Categoria="Informática", Estoque=1, EstoqueMinimo=2, Preco=800 },
+        new() { Id=12, Nome="Scanner", Categoria="Informática", Estoque=5, EstoqueMinimo=2, Preco=600 },
+        new() { Id=13, Nome="Cabo HDMI", Categoria="Acessórios", Estoque=0, EstoqueMinimo=5, Preco=50 },
+        new() { Id=14, Nome="Pen Drive", Categoria="Acessórios", Estoque=3, EstoqueMinimo=5, Preco=60 },
+        new() { Id=15, Nome="HD Externo", Categoria="Informática", Estoque=7, EstoqueMinimo=2, Preco=450 }
+    };
+
+    public IActionResult Index() => View(produtos);
+
+    public IActionResult Baixo()
+        => View("Index", produtos.Where(x => x.Estoque > 0 && x.Estoque <= x.EstoqueMinimo));
+
+    public IActionResult Esgotados()
+        => View("Index", produtos.Where(x => x.Estoque == 0));
+
+    public IActionResult Alertas()
+        => View("Index", produtos.Where(x => x.Estoque <= x.EstoqueMinimo));
+}
+
+
+// ============================================================
+// VIEWS/SHARED/_LAYOUT.CSHTML
+// ============================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Estoque</title>
+</head>
+<body>
+
+<nav>
+    <a asp-action="Index">Todos</a> |
+    <a asp-action="Baixo">Estoque Baixo</a> |
+    <a asp-action="Esgotados">Esgotados</a> |
+    <a asp-action="Alertas">Alertas</a>
+</nav>
+
+<hr />
+
+@RenderBody()
+
+</body>
+</html>
+
+
+// ============================================================
+// VIEWS/ESTOQUE/INDEX.CSHTML
+// ============================================================
+
+@model IEnumerable<EstoqueMVC.Models.Produto>
+
+<h1>Sistema de Estoque</h1>
+
+<table border="1">
+<tr>
+    <th>Produto</th>
+    <th>Categoria</th>
+    <th>Estoque</th>
+    <th>Mínimo</th>
+    <th>Preço</th>
+    <th>Status</th>
+</tr>
+
+@foreach (var p in Model)
+{
+<tr>
+    <td>@p.Nome</td>
+    <td>@p.Categoria</td>
+    <td>@p.Estoque</td>
+    <td>@p.EstoqueMinimo</td>
+    <td>R$ @p.Preco.ToString("N2")</td>
+    <td>@p.Status</td>
+</tr>
+}
+</table>
